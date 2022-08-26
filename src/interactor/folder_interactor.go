@@ -26,14 +26,13 @@ type GetFolderConditions struct {
 }
 
 func (u *FolderInteractor) CreateFolder(c *gin.Context) {
-	devlog.Debug("[FolderInteractor] - Create")
 	reqData := models.Folder{}
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	if err := json.Unmarshal(body, &reqData); err != nil {
 		return
 	}
 	u.FolderRepository.Create(&reqData)
-	devlog.Debug("CREATE!!!!!!!!!!!!!", body, reqData)
+	devlog.Debug("[CreateFolder]", body, reqData)
 }
 func (u *FolderInteractor) GetFolder(c *gin.Context) {
 	response := FolderList{
@@ -56,6 +55,6 @@ func (u *FolderInteractor) returnResponse(c *gin.Context, data interface{}) {
 		response := data.(FolderList)
 		c.JSON(GetHTTPStatusCode(response.ApiResponse.ResultCode), response)
 	default:
-		devlog.Fatal("Type error: ", v)
+		devlog.Fatal("[returnResponse] Type error: ", v)
 	}
 }
