@@ -4,10 +4,12 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"tidify/devlog"
+	"tidify/interactor"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
@@ -44,20 +46,26 @@ func GoogleLoginHandler(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, url)
 }
 
-func GoogleAuthCallback(ctx *gin.Context) {
-	oauthstate, _ := ctx.Cookie("oauthstate")
-	if ctx.Request.FormValue("state") != oauthstate {
-		devlog.Debug("[GoogleAuthCallback] Invalid googla oauth state - cookie:", oauthstate, ctx.Request.FormValue("state"))
-		ctx.Redirect(http.StatusFound, "http://localhost:8888")
-		return
+func GoogleAuthCallback(u *interactor.UserInteractor) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		oauthstate, _ := ctx.Cookie("oauthstate")
+		if ctx.Request.FormValue("state") != oauthstate {
+			devlog.Debug("[GoogleAuthCallback] Invalid googla oauth state - cookie:", oauthstate, ctx.Request.FormValue("state"))
+			ctx.Redirect(http.StatusFound, "http://localhost:8888")
+			return
+		}
+		data, err := getGoogleUserInfo(ctx.Request.FormValue("code"))
+		if err != nil {
+			devlog.Debug("[GoogleAuthCallback] Invalid googla oauth code ", err.Error())
+			ctx.Redirect(http.StatusFound, "http://localhost:8888")
+			return
+		}
+		userData := &UserGoogle{}
+		json.Unmarshal(data, &userData)
+		u.CreateUser(ctx, userData.Email, "google")
+		devlog.Debug(string(data), googleToken, userData)
 	}
-	data, err := getGoogleUserInfo(ctx.Request.FormValue("code"))
-	if err != nil {
-		devlog.Debug("[GoogleAuthCallback] Invalid googla oauth code ", err.Error())
-		ctx.Redirect(http.StatusFound, "http://localhost:8888")
-		return
-	}
-	devlog.Debug(string(data), googleToken)
+
 }
 
 func setConfig() {

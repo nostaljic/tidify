@@ -36,7 +36,7 @@ func SetupRoutes(db *gorm.DB) {
 
 	setUpFolder(folderGroup, folderInteractor)
 	setUpUser(userGroup, userInteractor)
-	setUpOauth(oauthGroup)
+	setUpOauth(oauthGroup, userInteractor)
 
 	httpRouter.Run(":8888")
 }
@@ -51,14 +51,14 @@ func setUpFolder(group *gin.RouterGroup,
 func setUpUser(group *gin.RouterGroup,
 	userInteractor *interactor.UserInteractor,
 ) {
-	group.POST("", userInteractor.CreateUser)
+	//group.POST("", userInteractor.CreateUser)
 	group.GET("", userInteractor.SignAgain)
 }
 
-func setUpOauth(group *gin.RouterGroup) {
+func setUpOauth(group *gin.RouterGroup, userInteractor *interactor.UserInteractor) {
 	group.GET("")
 	group.GET("/google", goauth.GoogleLoginHandler)
-	group.GET("/google/callback", goauth.GoogleAuthCallback)
+	group.GET("/google/callback", goauth.GoogleAuthCallback(userInteractor))
 	//TODO : APPLE
 	//group.GET("/apple", apauth.AppleLoginHandler)
 	//group.GET("/apple/callback", apauth.AppleAuthCallback)

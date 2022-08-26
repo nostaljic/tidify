@@ -3,8 +3,6 @@ package interactor
 import (
 	"crypto/sha512"
 	"encoding/base64"
-	"encoding/json"
-	"io/ioutil"
 	auth "tidify/auth"
 	"tidify/devlog"
 	models "tidify/models"
@@ -18,14 +16,14 @@ type UserInteractor struct {
 	UserModel      models.User
 }
 
-func (u *UserInteractor) CreateUser(c *gin.Context) {
-	reqData := models.User{}
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	if err := json.Unmarshal(body, &reqData); err != nil {
-		devlog.Debug("[CreateUser] Unmarshal Error:", err)
-		u.returnResponse(c, GetAPIResponse(ERROR_CHECK_NESSESARY_INFORMATIONS))
-		return
-	}
+func (u *UserInteractor) CreateUser(c *gin.Context, email string, sns string) {
+	reqData := models.User{UserEmail: email, SnsType: sns}
+	// body, _ := ioutil.ReadAll(c.Request.Body)
+	// if err := json.Unmarshal(body, &reqData); err != nil {
+	// 	devlog.Debug("[CreateUser] Unmarshal Error:", err)
+	// 	u.returnResponse(c, GetAPIResponse(ERROR_CHECK_NESSESARY_INFORMATIONS))
+	// 	return
+	// }
 	if len(reqData.UserEmail) == 0 || len(reqData.SnsType) == 0 {
 		u.returnResponse(c, GetAPIResponse(REQUEST_DATA_EMPTY))
 		return
