@@ -7,7 +7,8 @@ import (
 	"tidify/repository"
 
 	goauth "tidify/google"
-	//kaauth "tidify/kakao"
+	kaauth "tidify/kakao"
+
 	//apauth "tidify/apple"
 
 	"github.com/gin-gonic/gin"
@@ -63,6 +64,6 @@ func setUpOauth(group *gin.RouterGroup) {
 	//group.GET("/apple", apauth.AppleLoginHandler)
 	//group.GET("/apple/callback", apauth.AppleAuthCallback)
 	//TODO : KAKAO
-	//group.GET("/kakao", kaauth.KakaoLoginHandler)
-	//group.GET("/kakao/callback", kaauth.KakaoAuthCallback)
+	group.GET("/kakao", kaauth.KakaoLoginHandler)
+	group.GET("/kakao/callback", kaauth.KakaoAuthCallback)
 }
