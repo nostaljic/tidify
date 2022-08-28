@@ -63,6 +63,22 @@ func RefreshAccessToken(c *gin.Context) (string, error) {
 	}
 	return CreateJWT(claims.Email, claims.Sns)
 }
+func ParseEmailFromToken(c *gin.Context) (string, error) {
+	token, err := c.Request.Cookie("access-token")
+	if err != nil {
+		return "", err
+	}
+	tknStr := token.Value
+	if tknStr == "" {
+		return "", nil
+	}
+	claims := &Claims{}
+	key := func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	}
+	_, err = jwt.ParseWithClaims(tknStr, claims, key)
+	return claims.Email, nil
+}
 
 // DBTransactionMiddleware : to setup the database transaction middleware
 func JwtCheckMiddleware() gin.HandlerFunc {

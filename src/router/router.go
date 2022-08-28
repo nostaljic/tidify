@@ -47,6 +47,8 @@ func setUpFolder(group *gin.RouterGroup,
 	group.Use(auth.JwtCheckMiddleware())
 	group.GET("", folderInteractor.GetFolder)
 	group.POST("", folderInteractor.CreateFolder)
+	group.DELETE("", folderInteractor.DeleteFolder)
+	group.PUT("", folderInteractor.UpdateFolder)
 }
 
 func setUpUser(group *gin.RouterGroup,
@@ -63,7 +65,6 @@ func setUpOauth(group *gin.RouterGroup, userInteractor *interactor.UserInteracto
 	//TODO : APPLE
 	//group.GET("/apple", apauth.AppleLoginHandler)
 	//group.GET("/apple/callback", apauth.AppleAuthCallback)
-	//TODO : KAKAO
 	group.GET("/kakao", kaauth.KakaoLoginHandler)
 	group.GET("/kakao/callback", kaauth.KakaoAuthCallback(userInteractor))
 }
