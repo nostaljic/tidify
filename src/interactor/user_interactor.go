@@ -18,12 +18,6 @@ type UserInteractor struct {
 
 func (u *UserInteractor) CreateUser(c *gin.Context, email string, sns string) {
 	reqData := models.User{UserEmail: email, SnsType: sns}
-	// body, _ := ioutil.ReadAll(c.Request.Body)
-	// if err := json.Unmarshal(body, &reqData); err != nil {
-	// 	devlog.Debug("[CreateUser] Unmarshal Error:", err)
-	// 	u.returnResponse(c, GetAPIResponse(ERROR_CHECK_NESSESARY_INFORMATIONS))
-	// 	return
-	// }
 	if len(reqData.UserEmail) == 0 || len(reqData.SnsType) == 0 {
 		u.returnResponse(c, GetAPIResponse(REQUEST_DATA_EMPTY))
 		return
@@ -32,7 +26,8 @@ func (u *UserInteractor) CreateUser(c *gin.Context, email string, sns string) {
 	reqData.UserEmail = hashEmail(reqData.UserEmail)
 	devlog.Debug("[CreateUser] User Email Hash", reqData.UserEmail)
 	isAlreadyExist, err := u.UserRepository.IsUserExist(&reqData)
-	if !isAlreadyExist {
+	devlog.Debug("[CreateUser] isAlreadyExist", isAlreadyExist)
+	if isAlreadyExist {
 		devlog.Debug("[CreateUser] Already Exist", err)
 		u.SignIn(c, userEmail, reqData.SnsType)
 		return
@@ -42,7 +37,9 @@ func (u *UserInteractor) CreateUser(c *gin.Context, email string, sns string) {
 	if !createResult {
 		u.returnResponse(c, GetAPIResponse(ERROR_COMMUNICATE_INTERNAL_DATABASE))
 	}
+	u.SignIn(c, userEmail, reqData.SnsType)
 	devlog.Debug("[CreateUser] Result", reqData)
+	return
 }
 func (u *UserInteractor) SignAgain(c *gin.Context) {
 	accessToken, err := auth.RefreshAccessToken(c)

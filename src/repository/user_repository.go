@@ -26,10 +26,10 @@ func (f UserRepository) Migrate() error {
 func (f UserRepository) IsUserExist(user *models.User) (bool, *DBError) {
 	userResult := &models.User{}
 
-	if err := f.DB.Where("user_email=? AND sns_type=?", user.UserEmail, user.SnsType).First(userResult).Error; err != nil {
+	if err := f.DB.Debug().Where("user_email=? AND sns_type=?", user.UserEmail, user.SnsType).First(userResult).Error; err != nil {
 		return false, CreateDBError(DB_INFRA_ERROR, "Can't find Database")
 	}
-	if len(userResult.UserEmail) != 0 {
+	if len(userResult.UserEmail) == 0 {
 		devlog.Debug("[IsUserExist] Can Register", userResult)
 		return false, nil
 	}
