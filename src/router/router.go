@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//SetupRoutes : all the routes are defined here
+// SetupRoutes : all the routes are defined here
 func SetupRoutes(db *gorm.DB) {
 	httpRouter := gin.Default()
 
@@ -65,5 +65,5 @@ func setUpOauth(group *gin.RouterGroup) {
 	//group.GET("/apple/callback", apauth.AppleAuthCallback)
 	//TODO : KAKAO
 	group.GET("/kakao", kaauth.KakaoLoginHandler)
-	group.GET("/kakao/callback", kaauth.KakaoAuthCallback)
+	group.GET("/kakao/callback", kaauth.KakaoAuthCallback(userInteractor))
 }
