@@ -18,7 +18,7 @@ type Claims struct {
 func CreateJWT(Email string, Sns string) (string, error) {
 	mySigningKey := []byte(os.Getenv("SECRET_KEY"))
 	//claims := &Claims{Email: Email, Sns: Sns, StandardClaims: jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 60 * 24).Unix()}}
-	claims := &Claims{Email: Email, Sns: Sns, StandardClaims: jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 1).Unix()}}
+	claims := &Claims{Email: Email, Sns: Sns, StandardClaims: jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 120).Unix()}}
 	aToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tk, err := aToken.SignedString(mySigningKey)
 	if err != nil {
