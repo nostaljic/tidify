@@ -27,15 +27,20 @@ var (
 	googleToken = ""
 )
 
-type UserAuthCode struct {
-	Code string `json:"code"`
-}
 type UserGoogle struct {
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
 	Hd            string `json:"hd"`
 	Picture       string `json:"picture"`
 	Sub           string `json:"sub"`
+}
+
+func setConfig() {
+	config.ClientID = os.Getenv("GOOGLE_CLIENT_ID")
+	config.ClientSecret = os.Getenv("GOOGLE_SECRET_KEY")
+	config.RedirectURL = "http://localhost:8888/auth/google/callback"
+	config.Scopes = []string{"https://www.googleapis.com/auth/userinfo.email"}
+	config.Endpoint = google.Endpoint
 }
 
 func GoogleLoginHandler(ctx *gin.Context) {
@@ -66,14 +71,6 @@ func GoogleAuthCallback(u *interactor.UserInteractor) gin.HandlerFunc {
 		devlog.Debug(string(data), googleToken, userData)
 	}
 
-}
-
-func setConfig() {
-	config.ClientID = os.Getenv("GOOGLE_CLIENT_ID")
-	config.ClientSecret = os.Getenv("GOOGLE_SECRET_KEY")
-	config.RedirectURL = "http://localhost:8888/auth/google/callback"
-	config.Scopes = []string{"https://www.googleapis.com/auth/userinfo.email"}
-	config.Endpoint = google.Endpoint
 }
 
 func generateStateOauthCookie(ctx *gin.Context) string {
