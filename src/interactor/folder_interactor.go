@@ -52,6 +52,13 @@ func (u *FolderInteractor) DeleteFolder(c *gin.Context) {
 		u.returnResponse(c, GetAPIResponse(INTERNAL_SERVER_ERROR))
 		return
 	}
+	userEmail, err := auth.ParseEmailFromToken(c)
+	devlog.Debug("[DeleteFolder] Permission Test", err, userEmail)
+	available := u.isMyFolder(int(reqData.FolderID), userEmail)
+	if !available {
+		u.returnResponse(c, GetAPIResponse(NO_PERMISSION))
+		return
+	}
 	if err := u.FolderRepository.Delete(reqData.FolderID); err != nil {
 		u.returnResponse(c, GetAPIResponse(INTERNAL_SERVER_ERROR))
 		return
@@ -68,6 +75,13 @@ func (u *FolderInteractor) UpdateFolder(c *gin.Context) {
 		return
 	}
 	reqData.UpdatedAt = time.Now()
+	userEmail, err := auth.ParseEmailFromToken(c)
+	devlog.Debug("[UpdateFolder] Permission Test", err, userEmail)
+	available := u.isMyFolder(int(reqData.FolderID), userEmail)
+	if !available {
+		u.returnResponse(c, GetAPIResponse(NO_PERMISSION))
+		return
+	}
 	if err := u.FolderRepository.Update(&reqData); err != nil {
 		u.returnResponse(c, GetAPIResponse(INTERNAL_SERVER_ERROR))
 		return
@@ -84,7 +98,7 @@ func (u *FolderInteractor) GetFolder(c *gin.Context) {
 		return
 	}
 	userEmail, err := auth.ParseEmailFromToken(c)
-	devlog.Debug("[GetFolder]", req, userEmail)
+
 	folders, err := u.FolderRepository.FindFolderList(userEmail, req.Start, req.Count, req.Keyword)
 	totalCount, err := u.FolderRepository.FindFolderListCount(userEmail, req.Keyword)
 	response.List = folders
@@ -92,6 +106,18 @@ func (u *FolderInteractor) GetFolder(c *gin.Context) {
 	response.ApiResponse = GetAPIResponse(OK)
 	devlog.Debug("[GetFolder]", folders, err)
 	u.returnResponse(c, response)
+}
+
+func (u *FolderInteractor) isMyFolder(folderId int, email string) bool {
+	folder := u.FolderRepository.GetFolderByID(folderId)
+	if folder == nil {
+		return false
+	}
+	devlog.Debug("[isMyFolder] result", folder, folder.UserEmail, email)
+	if folder.UserEmail != email {
+		return false
+	}
+	return true
 }
 
 func (u *FolderInteractor) returnResponse(c *gin.Context, data interface{}) {

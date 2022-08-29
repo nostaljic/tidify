@@ -7,6 +7,7 @@ import (
 const (
 	OK                                  = "N200"
 	TOKEN_AUTHENTICATION_ERROR          = "E300"
+	NO_PERMISSION                       = "E305"
 	INTERNAL_SERVER_ERROR               = "E500"
 	ERROR_CHECK_NESSESARY_INFORMATIONS  = "E540"
 	REQUEST_DATA_EMPTY                  = "E541"
@@ -20,6 +21,7 @@ const (
 var ResultMessages = map[string]string{
 	OK:                                  "OK.",
 	TOKEN_AUTHENTICATION_ERROR:          "Authentication error with given token.",
+	NO_PERMISSION:                       "No permission",
 	INTERNAL_SERVER_ERROR:               "Internal Server Error Occured.",
 	ERROR_CHECK_NESSESARY_INFORMATIONS:  "Please check nessesary informations.",
 	REQUEST_DATA_EMPTY:                  "Some of request data is empty.",
@@ -33,6 +35,7 @@ var ResultMessages = map[string]string{
 var HTTPStatusCodes = map[string]int{
 	OK:                                  http.StatusOK,
 	TOKEN_AUTHENTICATION_ERROR:          http.StatusUnauthorized,
+	NO_PERMISSION:                       http.StatusUnauthorized,
 	ERROR_CHECK_NESSESARY_INFORMATIONS:  http.StatusBadRequest,
 	INTERNAL_SERVER_ERROR:               http.StatusInternalServerError,
 	REQUEST_DATA_EMPTY:                  http.StatusBadRequest,

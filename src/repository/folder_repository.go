@@ -77,3 +77,13 @@ func (f FolderRepository) Update(folder *models.Folder) error {
 	return nil
 	//TODO: RESPONSE
 }
+
+func (f FolderRepository) GetFolderByID(folderId int) *models.Folder {
+	myFolder := models.Folder{}
+	if err := f.DB.Debug().
+		Model(models.Folder{}).
+		Where("folder_id=?", folderId).First(&myFolder).Error; err != nil {
+		return nil
+	}
+	return &myFolder
+}
