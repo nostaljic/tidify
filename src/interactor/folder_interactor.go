@@ -37,6 +37,14 @@ func (u *FolderInteractor) CreateFolder(c *gin.Context) {
 		u.returnResponse(c, GetAPIResponse(INVALID_REQUEST_DATAS))
 		return
 	}
+	if reqData.FolderTitle == "" || reqData.FolderColor == "" {
+		u.returnResponse(c, GetAPIResponse(INVALID_REQUEST_DATAS))
+		return
+	}
+	userEmail, err := auth.ParseEmailFromToken(c)
+	devlog.Debug("[CreateFolder] Permission Test", err, userEmail)
+	reqData.UserEmail = userEmail
+	devlog.Debug("[CreateFolder] Create DB Model", reqData)
 	if err := u.FolderRepository.Create(&reqData); err != nil {
 		u.returnResponse(c, GetAPIResponse(INTERNAL_SERVER_ERROR))
 		return
@@ -59,7 +67,7 @@ func (u *FolderInteractor) DeleteFolder(c *gin.Context) {
 		u.returnResponse(c, GetAPIResponse(NO_PERMISSION))
 		return
 	}
-	if err := u.FolderRepository.Delete(reqData.FolderID); err != nil {
+	if err := u.FolderRepository.Delete(reqData.FolderID, userEmail); err != nil {
 		u.returnResponse(c, GetAPIResponse(INTERNAL_SERVER_ERROR))
 		return
 	}
@@ -74,6 +82,11 @@ func (u *FolderInteractor) UpdateFolder(c *gin.Context) {
 		u.returnResponse(c, GetAPIResponse(INTERNAL_SERVER_ERROR))
 		return
 	}
+	if reqData.UserEmail != "" {
+		u.returnResponse(c, GetAPIResponse(INVALID_REQUEST_DATAS))
+		return
+	}
+
 	reqData.UpdatedAt = time.Now()
 	userEmail, err := auth.ParseEmailFromToken(c)
 	devlog.Debug("[UpdateFolder] Permission Test", err, userEmail)
@@ -93,10 +106,11 @@ func (u *FolderInteractor) UpdateFolder(c *gin.Context) {
 func (u *FolderInteractor) GetFolder(c *gin.Context) {
 	response := FolderList{}
 	req := GetFolderConditions{}
-	if c.BindQuery(&req) != nil {
+	if c.ShouldBindQuery(&req) != nil {
 		u.returnResponse(c, GetAPIResponse(INVALID_REQUEST_QUERIES))
 		return
 	}
+
 	userEmail, err := auth.ParseEmailFromToken(c)
 
 	folders, err := u.FolderRepository.FindFolderList(userEmail, req.Start, req.Count, req.Keyword)
@@ -109,6 +123,9 @@ func (u *FolderInteractor) GetFolder(c *gin.Context) {
 }
 
 func (u *FolderInteractor) isMyFolder(folderId int, email string) bool {
+	if folderId == 0 {
+		return true
+	}
 	folder := u.FolderRepository.GetFolderByID(folderId)
 	if folder == nil {
 		return false
@@ -122,9 +139,13 @@ func (u *FolderInteractor) isMyFolder(folderId int, email string) bool {
 
 func (u *FolderInteractor) returnResponse(c *gin.Context, data interface{}) {
 	switch v := data.(type) {
+	case BasicResponse:
+		response := data.(BasicResponse)
+		c.JSON(GetHTTPStatusCode(response.APIResponse.ResultCode), response)
 	case APIResponse:
 		response := data.(APIResponse)
-		c.JSON(GetHTTPStatusCode(response.ResultCode), response)
+		resp := BasicResponse{APIResponse: response}
+		c.JSON(GetHTTPStatusCode(response.ResultCode), resp)
 	case FolderList:
 		response := data.(FolderList)
 		c.JSON(GetHTTPStatusCode(response.ApiResponse.ResultCode), response)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"tidify/devlog"
 	"tidify/models"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -27,20 +28,20 @@ func (f FolderRepository) Migrate() error {
 func (f FolderRepository) FindFolderListCount(email string, keyword string) (int64, error) {
 	devlog.Debug("[FolderRepository] - FindFolderListCount")
 	var count int64
-	qry := subQueryToGetList(f.DB, email, keyword)
+	qry := subQueryToGetFolderList(f.DB, email, keyword)
 	err := qry.Count(&count).Error
 	return count, err
 }
 
 func (f FolderRepository) FindFolderList(email string, start int, count int, keyword string) (folders []models.Folder, err error) {
 	devlog.Debug("[FolderRepository] - FindFolderList")
-	qry := subQueryToGetList(f.DB, email, keyword)
+	qry := subQueryToGetFolderList(f.DB, email, keyword)
 	err = qry.Debug().Order("updated_at DESC").Offset(start).Limit(count).Find(&folders).Error
 	return folders, err
 
 }
 
-func subQueryToGetList(db *gorm.DB, email string, keyword string) *gorm.DB {
+func subQueryToGetFolderList(db *gorm.DB, email string, keyword string) *gorm.DB {
 	qry := db.
 		Model(&models.Folder{}).
 		Preload("folders").
@@ -59,12 +60,21 @@ func (f FolderRepository) Create(folder *models.Folder) error {
 	//TODO: RESPONSE
 }
 
-func (f FolderRepository) Delete(folderId int) error {
+func (f FolderRepository) Delete(folderId int, email string) error {
+	txDB := f.DB.Begin()
 	folder := models.Folder{}
-	if err := f.DB.Debug().
-		Model(&folder).Where("folder_id = ?", folderId).Delete(&folder).Error; err != nil {
+	if err := txDB.Debug().
+		Model(&folder).Where("folder_id = ? AND user_email = ?", folderId, email).Delete(&folder).Error; err != nil {
+		txDB.Rollback()
 		return err
 	}
+	bookmark := models.Bookmark{}
+	if err := txDB.Debug().
+		Model(&bookmark).Where("folder_id = ? AND user_email = ?", folderId, email).Update("folder_id", 0).Update("updated_at", time.Now()).Error; err != nil {
+		txDB.Rollback()
+		return err
+	}
+	txDB.Commit()
 	return nil
 	//TODO: RESPONSE
 }
