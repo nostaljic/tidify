@@ -5,12 +5,12 @@ import (
 )
 
 type BaseModel struct {
-	CreatedAt time.Time `json:"create_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type User struct {
 	BaseModel
-	UserEmail string `gorm:"primary_key;varchar(50);not null;" json:"user_email"`
-	SnsType   string `gorm:"not null;" json:"sns_type"`
+	UserEmail string `json:"user_email" gorm:"primary_key;varchar(50);not null;check:user_email <> ''"`
+	SnsType   string `json:"sns_type" gorm:"not null;check:sns_type <> ''"`
 }
