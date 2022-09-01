@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	auth "tidify/auth"
 	"tidify/devlog"
 	"tidify/interactor"
 
@@ -39,7 +40,7 @@ type UserProfile struct {
 func setConfig() {
 	config.ClientID = os.Getenv("KAKAO_CLIENT_ID")
 	config.ClientSecret = os.Getenv("KAKAO_SECRET_KEY")
-	config.RedirectURL = "http://localhost:8888/auth/kakao/callback"
+	config.RedirectURL = "http://118.67.130.242:8888//auth/kakao/callback"
 	config.Endpoint = oauth2.Endpoint{
 		AuthURL:  "https://kauth.kakao.com/oauth/authorize",
 		TokenURL: "https://kauth.kakao.com/oauth/token",
@@ -60,13 +61,13 @@ func KakaoAuthCallback(u *interactor.UserInteractor) gin.HandlerFunc {
 		oauthstate, _ := ctx.Cookie("oauthstate")
 		if ctx.Request.FormValue("state") != oauthstate {
 			devlog.Debug("[KakaoAuthCallback] Invalid Kakao oauth state - cookie:", oauthstate, ctx.Request.FormValue("state"))
-			ctx.Redirect(http.StatusFound, "http://localhost:8888")
+			ctx.JSON(auth.GetHTTPStatusCode(auth.TOKEN_AUTHENTICATION_ERROR), auth.GetAPIResponse(auth.TOKEN_AUTHENTICATION_ERROR))
 			return
 		}
 		data, err := getKakaoUserInfo(ctx.Request.FormValue("code"))
 		if err != nil {
 			devlog.Debug("[KakaoAuthCallback] Invalid Kakao oauth code ", err.Error())
-			ctx.Redirect(http.StatusFound, "http://localhost:8888")
+			ctx.JSON(auth.GetHTTPStatusCode(auth.TOKEN_AUTHENTICATION_ERROR), auth.GetAPIResponse(auth.TOKEN_AUTHENTICATION_ERROR))
 			return
 		}
 		userData := &UserProfile{}

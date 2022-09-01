@@ -123,9 +123,6 @@ func (u *FolderInteractor) GetFolder(c *gin.Context) {
 }
 
 func (u *FolderInteractor) isMyFolder(folderId int, email string) bool {
-	if folderId == 0 {
-		return true
-	}
 	folder := u.FolderRepository.GetFolderByID(folderId)
 	if folder == nil {
 		return false

@@ -10,14 +10,14 @@ const (
 	NO_PERMISSION                       = "E302"
 	INTERNAL_SERVER_ERROR               = "E303"
 	REQUEST_DATA_EMPTY                  = "E311"
-	INVALID_REQUEST_QUERIES             = "E314"
-	INVALID_REQUEST_DATAS               = "E315"
+	INVALID_REQUEST_QUERIES             = "E312"
+	INVALID_REQUEST_DATAS               = "E313"
 	ERROR_COMMUNICATE_INTERNAL_DATABASE = "E320"
 )
 
 var ResultMessages = map[string]string{
 	OK:                                  "OK.",
-	TOKEN_AUTHENTICATION_ERROR:          "Authentication error with given token.",
+	TOKEN_AUTHENTICATION_ERROR:          "Token authentication error.",
 	NO_PERMISSION:                       "No permission",
 	INTERNAL_SERVER_ERROR:               "Internal Server Error Occured.",
 	REQUEST_DATA_EMPTY:                  "Some of request data is empty.",
@@ -40,9 +40,7 @@ var HTTPStatusCodes = map[string]int{
 type BasicResponse struct {
 	APIResponse APIResponse `json:"api_response"`
 }
-type ErrorResponse struct {
-	APIResponse APIResponse `json:"api_response"`
-}
+
 type APIResponse struct {
 	ResultCode    string `json:"result_code"`
 	ResultMessage string `json:"result_message"`
