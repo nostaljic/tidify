@@ -117,7 +117,7 @@ func (u *BookmarkInteractor) GetBookmark(c *gin.Context) {
 	response := BookmarkList{}
 	req := GetBookmarkConditions{}
 	if err := c.ShouldBindQuery(&req); err != nil {
-		devlog.Debug("[GetBookmark]", err)
+		devlog.Debug("[GetBookmark] Binding Error", err)
 		u.returnResponse(c, GetAPIResponse(INVALID_REQUEST_QUERIES))
 		return
 	}

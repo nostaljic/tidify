@@ -78,9 +78,13 @@ func hashEmail(email string) string {
 
 func (u *UserInteractor) returnResponse(c *gin.Context, data interface{}) {
 	switch v := data.(type) {
+	case BasicResponse:
+		response := data.(BasicResponse)
+		c.JSON(GetHTTPStatusCode(response.APIResponse.ResultCode), response)
 	case APIResponse:
 		response := data.(APIResponse)
-		c.JSON(GetHTTPStatusCode(response.ResultCode), response)
+		resp := BasicResponse{APIResponse: response}
+		c.JSON(GetHTTPStatusCode(response.ResultCode), resp)
 	default:
 		devlog.Fatal("[returnResponse] Type error: ", v)
 	}
