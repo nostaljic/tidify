@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	auth "tidify/auth"
 	"tidify/devlog"
 	"tidify/interactor"
 
@@ -38,7 +39,9 @@ type UserGoogle struct {
 func setConfig() {
 	config.ClientID = os.Getenv("GOOGLE_CLIENT_ID")
 	config.ClientSecret = os.Getenv("GOOGLE_SECRET_KEY")
-	config.RedirectURL = "http://localhost:8888/auth/google/callback"
+	config.RedirectURL = "https://regal-crostata-9cf44e.netlify.app/google"
+	//config.RedirectURL = "http://localhost:8888/auth/google/callback"
+	//config.RedirectURL = "https://localhost:8081/google"
 	config.Scopes = []string{"https://www.googleapis.com/auth/userinfo.email"}
 	config.Endpoint = google.Endpoint
 }
@@ -56,13 +59,14 @@ func GoogleAuthCallback(u *interactor.UserInteractor) gin.HandlerFunc {
 		oauthstate, _ := ctx.Cookie("oauthstate")
 		if ctx.Request.FormValue("state") != oauthstate {
 			devlog.Debug("[GoogleAuthCallback] Invalid googla oauth state - cookie:", oauthstate, ctx.Request.FormValue("state"))
-			ctx.Redirect(http.StatusFound, "http://localhost:8888")
+			ctx.JSON(auth.GetHTTPStatusCode(auth.TOKEN_AUTHENTICATION_ERROR), auth.GetAPIResponse(auth.TOKEN_AUTHENTICATION_ERROR))
 			return
+
 		}
 		data, err := getGoogleUserInfo(ctx.Request.FormValue("code"))
 		if err != nil {
 			devlog.Debug("[GoogleAuthCallback] Invalid googla oauth code ", err.Error())
-			ctx.Redirect(http.StatusFound, "http://localhost:8888")
+			ctx.JSON(auth.GetHTTPStatusCode(auth.TOKEN_AUTHENTICATION_ERROR), auth.GetAPIResponse(auth.TOKEN_AUTHENTICATION_ERROR))
 			return
 		}
 		userData := &UserGoogle{}

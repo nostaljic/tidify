@@ -22,6 +22,10 @@ var HTTPStatusCodes = map[string]int{
 	TOKEN_EXPIRED:              http.StatusUnauthorized,
 }
 
+type BasicResponse struct {
+	APIResponse APIResponse `json:"api_response"`
+}
+
 type APIResponse struct {
 	ResultCode    string `json:"result_code"`
 	ResultMessage string `json:"result_message"`
@@ -31,9 +35,10 @@ func GetHTTPStatusCode(code string) int {
 	return HTTPStatusCodes[code]
 }
 
-func GetAPIResponse(code string) APIResponse {
-	return APIResponse{
-		ResultCode:    code,
-		ResultMessage: ResultMessages[code],
-	}
+func GetAPIResponse(code string) BasicResponse {
+	return BasicResponse{
+		APIResponse: APIResponse{
+			ResultCode:    code,
+			ResultMessage: ResultMessages[code],
+		}}
 }
