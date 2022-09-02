@@ -41,6 +41,7 @@ func setConfig() {
 	config.ClientID = os.Getenv("KAKAO_CLIENT_ID")
 	config.ClientSecret = os.Getenv("KAKAO_SECRET_KEY")
 	config.RedirectURL = "http://118.67.130.242:8888//auth/kakao/callback"
+	//config.RedirectURL = "http://localhost:8888/auth/kakao/callback"
 	config.Endpoint = oauth2.Endpoint{
 		AuthURL:  "https://kauth.kakao.com/oauth/authorize",
 		TokenURL: "https://kauth.kakao.com/oauth/token",

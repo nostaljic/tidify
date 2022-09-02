@@ -10,6 +10,8 @@
 | v0.4.0 | 2022.08.30 | 기능 추가 | 박재용(scorpion@dgu.ac.k) |
 | v0.5.0 | 2022.08.31 | 기능 추가 | 박재용(scorpion@dgu.ac.k) |
 | v1.0.0 | 2022.08.31 | 문서 배포 | 박재용(scorpion@dgu.ac.k) |
+| v1.1.0 | 2022.09.02 | JWT 요구사항 반영 | 박재용(scorpion@dgu.ac.k) |
+
 
 
 
@@ -46,8 +48,19 @@
 #### Response Status Code
 | Code   | 설명  | 
 | ------ | ----- | 
-| N200   | Cookie: access-token, refresh-token 발급 완료 | 
+| N200   | Token 발급 완료(Cookie, Response Body 둘 다 지원) | 
 
+#### 응답 예시
+```json
+{
+    "access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InNjb3JwaW9uQGRndS5hYy5rciIsIlNucyI6Imdvb2dsZSIsImV4cCI6MTY2MjEwMDg3N30._swbYuJUXr-sx91cGMQhcZo2aVE9MCv01UhhASC2LeU",
+    "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InNjb3JwaW9uQGRndS5hYy5rciIsIlNucyI6Imdvb2dsZSIsImV4cCI6MTY2MjY5ODQ3N30.xczo0o6sRfvc449TTRm5SISgFnIlvlyjWdibEWhO3Mo",
+    "api_response":{
+        "result_code":"N200",
+        "result_message":"OK."
+    }
+}
+```
 ### 2.  GET /auth/kakao
 카카오 계정으로 로그인합니다. 카카오 로그인 페이지로 Redirect 된 후, 인증을 완료하면 로그인되어 Access Token과 Refresh Token이 발급됩니다.
 <br>※단, 최초 로그인 시 자동으로 가입됨
@@ -55,8 +68,19 @@
 #### Response Status Code
 | Code   | 설명  | 
 | ------ | ----- | 
-| N200   | Cookie: access-token, refresh-token 발급 완료 | 
+| N200   | Token 발급 완료(Cookie, Response Body 둘 다 지원) | 
 
+#### 응답 예시
+```json
+{
+    "access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InFrcndvZmhkOTdAbmF2ZXIuY29tIiwiU25zIjoia2FrYW8iLCJleHAiOjE2NjIxMDEzMzR9.tEe3CfNKRm1ocH6_gJL43nTnVAarN6VIErxu-_hQ2JM",
+    "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InFrcndvZmhkOTdAbmF2ZXIuY29tIiwiU25zIjoia2FrYW8iLCJleHAiOjE2NjI2OTg5MzR9.IleCx0IqeKWjFGMJ6bvNDDK7M3LTp07zAFkRqF6M7jM",
+    "api_response":{
+        "result_code":"N200",
+        "result_message":"OK."
+    }
+}
+```
 ### 3.  POST /auth/apple
 애플 계정으로 로그인합니다. Request Body에 Identity Token을 담아서 요청하면 로그인되어 Access Token과 Refresh Token이 발급됩니다.
 <br>※단, 최초 로그인 시 자동으로 가입됨
@@ -70,7 +94,7 @@ JSON 형식
 #### Response Status Code
 | Code   | 설명  | 
 | ------ | ----- | 
-| N200   | Cookie: access-token, refresh-token 발급 완료 | 
+| N200   | Token 발급 완료(Cookie, Response Body 둘 다 지원)  | 
 
 ### 4.  GET /signin
 Access Token이 만료되면 Refresh Token을 이용하여 Access Token을 재발급 받을 수 있습니다.
@@ -84,7 +108,7 @@ Access Token이 만료되면 Refresh Token을 이용하여 Access Token을 재�
 #### Response Status Code
 | Code   | 설명  | 
 | ------ | ----- | 
-| N200   | Cookie: access-token 재발급 완료 | 
+| N200   | Access Token 재발급 완료 (Cookie, Response Body 둘 다 지원) | 
 | E300   | Cookie: refresh-token 만료로 재발급 불가 | 
 
 #### 요청 및 응답 예시
@@ -99,6 +123,8 @@ refresh-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6Im04czh0NTlybnZAc
 [응답]
 ```json
 {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InFrcndvZmhkOTdAbmF2ZXIuY29tIiwiU25zIjoia2FrYW8iLCJleHAiOjE2NjIxMDAwMzh9.-tJwk4RSqDEX3B0yzOUJds504mmV8MzMRxZLTiohajY",
+    "refresh_token": "",
     "api_response": {
         "result_code": "N200",
         "result_message": "OK."
@@ -107,7 +133,7 @@ refresh-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6Im04czh0NTlybnZAc
 ```
 [Cookie]
 ```
-access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6Im04czh0NTlybnZAcHJpdmF0ZXJlbGF5LmFwcGxlaWQuY29tIiwiU25zIjoiYXBwbGUiLCJleHAiOjE2NjE5NjQwNzR9.Xs07phCjB8cqNTTrwyUprjX9Rwevp08cxZfJpURHeOU; Path=/; HttpOnly; Expires=Thu, 01 Sep 2022 14:41:14 GMT;
+access-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InFrcndvZmhkOTdAbmF2ZXIuY29tIiwiU25zIjoia2FrYW8iLCJleHAiOjE2NjIxMDAwMzh9.-tJwk4RSqDEX3B0yzOUJds504mmV8MzMRxZLTiohajY; Path=/; HttpOnly; Expires=Thu, 01 Sep 2022 14:41:14 GMT;
 ```
 
 ## 북마크 API
