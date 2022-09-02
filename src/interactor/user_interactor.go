@@ -15,6 +15,11 @@ type UserInteractor struct {
 	UserRepository repository.UserRepository
 	UserModel      models.User
 }
+type UserResponse struct {
+	AccessToken  string      `json:"access_token"`
+	RefreshToken string      `json:"refresh_token"`
+	APIResponse  APIResponse `json:"api_response"`
+}
 
 func (u *UserInteractor) CreateUser(c *gin.Context, email string, sns string) {
 	reqData := models.User{UserEmail: email, SnsType: sns}
@@ -48,7 +53,10 @@ func (u *UserInteractor) SignAgain(c *gin.Context) {
 		return
 	}
 	c.SetCookie("access-token", accessToken, 60*60*24, "", "", false, true)
-	u.returnResponse(c, GetAPIResponse(OK))
+	resp := UserResponse{}
+	resp.APIResponse = GetAPIResponse(OK)
+	resp.AccessToken = accessToken
+	u.returnResponse(c, resp)
 	return
 }
 func (u *UserInteractor) SignIn(c *gin.Context, email string, sns string) {
@@ -64,7 +72,11 @@ func (u *UserInteractor) SignIn(c *gin.Context, email string, sns string) {
 		return
 	}
 	c.SetCookie("refresh-token", refreshToken, 60*60*24*7, "", "", false, true)
-	u.returnResponse(c, GetAPIResponse(OK))
+	resp := UserResponse{}
+	resp.APIResponse = GetAPIResponse(OK)
+	resp.AccessToken = accessToken
+	resp.RefreshToken = refreshToken
+	u.returnResponse(c, resp)
 	return
 }
 
@@ -85,6 +97,9 @@ func (u *UserInteractor) returnResponse(c *gin.Context, data interface{}) {
 		response := data.(APIResponse)
 		resp := BasicResponse{APIResponse: response}
 		c.JSON(GetHTTPStatusCode(response.ResultCode), resp)
+	case UserResponse:
+		response := data.(UserResponse)
+		c.JSON(GetHTTPStatusCode(response.APIResponse.ResultCode), response)
 	default:
 		devlog.Fatal("[returnResponse] Type error: ", v)
 	}
